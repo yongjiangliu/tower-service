@@ -52,29 +52,28 @@ public class DocManageService {
         List<DocProperty> list = new ArrayList<>();
         try {
             String filePath = jsonObject.getString("path");
+            //这里需要优化 不用每次重新获取；
             UserZone userZone = checkUserZoneUtil.checkUserZone(request);
+            if (StringUtil.isNullOrEmpty(filePath)) {
+                filePath = docUrlSettings.getDocSavePath() + userZone.getUserDocUrl();//用户对应的默认扫描路径
+            }
             //检查登陆用户归属的区域 -1：全部数据；1：省端用户；:2：地市端用户；3：区县；999：是其他用户组；
             int userStatus = userZone.getUserStatus();
             if (userStatus == -1) {
-                list = scanFiles(docUrlSettings.getDocSavePath(), false, "", request);
+                list = scanFiles(filePath, false, "", request);
                 jd.setData(list);
-            }
-            else if (userStatus == 1 || userStatus == 2) {
+            } else if (userStatus == 1 || userStatus == 2) {
                 String zoneName = userZone.getZone().getName();//当前用户归属的地市 比如 成都
-                if (StringUtil.isNullOrEmpty(filePath)) {
-                    filePath = docUrlSettings.getDocSavePath() + userZone.getUserDocUrl();//用户对应的默认扫描路径
-                }
+
                 File file = new File(filePath);
                 if (file.exists()) {
                     List<DocProperty> docList = scanFiles(filePath, false, "", request);
                     jd.setData(docList);
-                }
-                else {
+                } else {
                     jd.setStatus("101");
                     jd.setData("您当前归属的区域为【" + zoneName + "】，档案资料路径不存在，路径：" + filePath);
                 }
-            }
-            else {//3：区县；999：是其他用户组 没有权限查看档案资料
+            } else {//3：区县；999：是其他用户组 没有权限查看档案资料
                 jd.setStatus("101");
                 jd.setData("您没有权限查看当前目录");
             }
@@ -137,8 +136,7 @@ public class DocManageService {
                             if (files[i].getName().indexOf(kw) > -1) {
                                 fileList.add(setDocProperty(files[i]));
                             }
-                        }
-                        else {
+                        } else {
                             fileList.add(setDocProperty(files[i]));
                         }
                     }
@@ -165,23 +163,19 @@ public class DocManageService {
                                     if (files[i].getName().indexOf(kw) > -1) {
                                         fileList.add(setDocProperty(files[i]));
                                     }
-                                }
-                                else {
+                                } else {
                                     fileList.add(setDocProperty(files[i]));
                                 }
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     throw new Exception("查找的目录路径不存在，当前路径：" + dirPath);
                 }
-            }
-            else {
+            } else {
                 throw new Exception("查找的目录路径不能为空");
             }
-        }
-        else {
+        } else {
             throw new Exception("查找的目录路径不能为空");
         }
         return fileList;
@@ -206,8 +200,7 @@ public class DocManageService {
             if (lastDot > -1) {
                 suffix = originalFileName.substring(lastDot + 1).toLowerCase();
                 fName = originalFileName.substring(0, lastDot);
-            }
-            else {
+            } else {
                 fName = originalFileName;
             }
         }
@@ -218,8 +211,7 @@ public class DocManageService {
         if (file.isDirectory()) {//文件夹
             doc.setIsDir(1);
             doc.setSize("--");
-        }
-        else {//文件
+        } else {//文件
             doc.setIsDir(0);
             double d = (double) file.length();
             FlowUnit bestUnit = FluxFormatter.findBestUnit(d, FlowUnit.Byte);
@@ -259,8 +251,7 @@ public class DocManageService {
         if (files.size() > 0) {
             if (files.size() == 1) {
                 ZipUtil.downloadSingleFile(files.get(0), request, response);
-            }
-            else {
+            } else {
                 docDownloadPackageNamePath = docUrlSettings.getDocDownloadPackageNamePath();
                 DssHelper.log("档案管理--打包下载时生成的文件路径：" + docDownloadPackageNamePath, this.getClass());
                 if (StringUtil.isNullOrEmpty(docDownloadPackageNamePath)) {
@@ -289,8 +280,7 @@ public class DocManageService {
             if (arrFiles.size() > 0) {
                 File file = new File(arrFiles.getJSONObject(0).getString("path"));
                 ZipUtil.downloadSingleFile(file, request, response);
-            }
-            else {
+            } else {
                 throw new Exception("没有要下载的文件。");
             }
         } catch (Exception e) {
@@ -321,8 +311,7 @@ public class DocManageService {
                 jd.setStatus("-1");
                 jd.setData("删除失败");
             }
-        }
-        else {
+        } else {
             jd.setStatus("-1");
             jd.setData("没有需要删除的文件");
         }
@@ -348,20 +337,17 @@ public class DocManageService {
                 File file;
                 if (isRoot.equals("1")) {//在根目录下创建文件夹
                     file = new File(docUrlSettings.getDocSavePath(), dirPath);
-                }
-                else {
+                } else {
                     file = new File(dirPath);
                 }
                 if (!file.exists()) {
                     file.mkdir();
                     jd.setData("创建成功");
-                }
-                else {
+                } else {
                     jd.setStatus("101");
                     jd.setData("已存在同名文件夹，请修改文件夹名称");
                 }
-            }
-            else {
+            } else {
                 jd.setStatus("102");
                 jd.setData("请求参数中isRoot属性不能为空");
             }
@@ -394,8 +380,7 @@ public class DocManageService {
                     //如果修改文件，输入的文件名不含后缀名，则自动获取文件后缀名
                     if (newName.indexOf(".") < 0) {
                         newName = newName + "." + suffix;
-                    }
-                    else {//如果含有后缀名，则判断是否和之前的后缀名相同；即不能出现a.txt修改为b.xlsx的情况
+                    } else {//如果含有后缀名，则判断是否和之前的后缀名相同；即不能出现a.txt修改为b.xlsx的情况
                         String suffixNew = newName.substring(newName.lastIndexOf(".") + 1);
                         if (!suffix.toLowerCase().equals(suffixNew.toLowerCase())) {
                             newName = newName + "." + suffix;
@@ -410,25 +395,21 @@ public class DocManageService {
                         if (!newFile.exists()) {
                             if (oldFile.renameTo(newFile)) {
                                 jd.setData("修改成功");
-                            }
-                            else {
+                            } else {
                                 jd.setStatus("-1");
                                 jd.setData("修改失败");
                             }
-                        }
-                        else {
+                        } else {
                             jd.setStatus("-1");
                             jd.setData("修改失败，已存在同名" + fileType + "名称，请修改名称");
                         }
                     }
-                }
-                else {
+                } else {
                     jd.setStatus("-1");
                     jd.setData("修改失败，修改的" + fileType + "路径不存在");
                 }
 
-            }
-            else {
+            } else {
                 jd.setStatus("-1");
                 jd.setData("请求参数中path和newname属性均不能为空");
             }
@@ -462,8 +443,7 @@ public class DocManageService {
                         if (!uploadPath.contains(docUrlSettings.getDocSavePath())) {
                             uploadPath = docUrlSettings.getDocSavePath();
                         }
-                    }
-                    else {//在非根目录下上传文件
+                    } else {//在非根目录下上传文件
                         if (StringUtil.isNullOrEmpty(uploadPath)) {
                             jd.setStatus("-1");
                             jd.setData("请求参数isRoot=0时path属性不能为空");
@@ -480,21 +460,18 @@ public class DocManageService {
                                 //记录重复文件名
                                 String shortFileName = fileName.substring(0, fileName.lastIndexOf("."));
                                 existedFileNames.add(shortFileName);
-                            }
-                            else {
+                            } else {
                                 file.transferTo(newFile);
                             }
                             //上传成功
                             if (existedFileNames.size() == 0) {
                                 jd.setStatus("0");
                                 jd.setData("上传成功");
-                            }
-                            else {//上传成功，但是有同名文件已忽略
+                            } else {//上传成功，但是有同名文件已忽略
                                 jd.setStatus("101");
                                 jd.setData(existedFileNames);
                             }
-                        }
-                        else {
+                        } else {
                             jd.setStatus("-1");
                             jd.setData("要上传的目标文件夹路径[" + uploadPath + "]不存在");
                             break;
@@ -502,13 +479,11 @@ public class DocManageService {
 
                     }
 
-                }
-                else {
+                } else {
                     jd.setStatus("-1");
                     jd.setData("请求参数中isRoot属性不能为空");
                 }
-            }
-            else {
+            } else {
                 jd.setStatus("-1");
                 jd.setData("没有需要上传的文件");
             }
