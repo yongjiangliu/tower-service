@@ -15,7 +15,12 @@ import java.io.Serializable;
 @Table(name = "dim_type_tower_shape")
 public class TypeTowerShape implements Serializable {
 
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Id
     @Column(name = "TypeID")
     private String typeID;
 

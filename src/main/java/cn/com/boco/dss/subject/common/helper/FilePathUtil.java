@@ -216,6 +216,8 @@ public class FilePathUtil {
             case check_report:
                 path += strReplace(check_report_path, provinceName, areaName, location, towerName, addRessCode, constractCode, dateTime);
                 break;
+		default:
+			break;
         }
         return path;
 

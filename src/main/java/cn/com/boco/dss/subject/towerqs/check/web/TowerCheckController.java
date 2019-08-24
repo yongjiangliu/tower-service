@@ -482,31 +482,12 @@ public class TowerCheckController {
     }
 
     private void setTowerRiskCount(Tower tower) {
-        long checkCount = towerRiskService.findCheckCountByLevel(tower.getTowerID(), Arrays.asList(1, 2),
+        int checkCount = towerRiskService.findCheckCountByLevel(tower.getTowerID(), Arrays.asList(1, 2),
                 Arrays.asList(0));
-        long checkCountA = towerRiskService.findCheckCountByLevel(tower.getTowerID(), Arrays.asList(1),
+        int checkCountA = towerRiskService.findCheckCountByLevel(tower.getTowerID(), Arrays.asList(1),
                 Arrays.asList(0));
-//        long detectionCount = towerRiskService.findDetectionCountByLevel(tower.getTowerID(),Arrays.asList(1,2), Arrays.asList(0));
-//        long detectionCountA = towerRiskService.findDetectionCountByLevel(tower.getTowerID(), Arrays.asList(1), Arrays.asList(0));
-
-        long detectionCount = Long.parseLong(tower.getDetectionRiskCount());
-        long detectionCountA = Long.parseLong(tower.getDetectionRiskCountA());
-        Integer level = 0;
-        // 风险评级，如果以上隐患为0则此值为0，A类不为0，则此值为1，如果A类为0但隐患数量>=5，此值为2，隐患数量<5此值为3
-        if (checkCount == 0 && checkCountA == 0 && detectionCount == 0 && detectionCountA == 0) {
-            level = 0;
-        } else if (checkCountA != 0 && detectionCountA != 0) {
-            level = 1;
-        } else if (checkCountA == 0 && detectionCountA == 0 && checkCount + detectionCount >= 5) {
-            level = 2;
-        } else if (checkCountA == 0 && detectionCountA == 0 && checkCount + detectionCount < 5) {
-            level = 3;
-        }
-        tower.setCheckRiskCount(String.valueOf(checkCount));
-        tower.setCheckRiskCountA(String.valueOf(checkCountA));
-        tower.setDetectionRiskCount(String.valueOf(detectionCount));
-        tower.setDetectionRiskCountA(String.valueOf(detectionCountA));
-        tower.setRiskLevel(String.valueOf(level));
+        tower.setCheckRiskCount(checkCount);
+        tower.setCheckRiskCountA(checkCountA);
     }
 
     private void setTowerByCheck(TowerCheck check, Tower tower) {

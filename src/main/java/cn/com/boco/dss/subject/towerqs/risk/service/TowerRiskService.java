@@ -109,11 +109,11 @@ public class TowerRiskService {
         return trr.findByTowerID(towerID);
     }
 
-    public long findCheckCountByLevel(String towerId,List<Integer> level, List<Integer> type  ) {
+    public int findCheckCountByLevel(String towerId,List<Integer> level, List<Integer> type  ) {
         return trr.findCheckCountByLevel(towerId, level, type);
     }
 
-    public long findDetectionCountByLevel(String towerId, List<Integer> level, List<Integer> type) {
+    public int findDetectionCountByLevel(String towerId, List<Integer> level, List<Integer> type) {
         return trr.findDetectionCountByLevel(towerId, level, type);
     }
 }
