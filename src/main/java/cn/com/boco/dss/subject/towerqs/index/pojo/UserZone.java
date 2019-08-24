@@ -21,6 +21,11 @@ public class UserZone {
      */
     private String userDocUrl;
 
+    /**
+     * 当前用户的UserZone缓存key
+     */
+    private String userZoneCacheId;
+
 
     public Integer getUserStatus() {
         return userStatus;
@@ -45,5 +50,13 @@ public class UserZone {
 
     public void setUserDocUrl(String userDocUrl) {
         this.userDocUrl = userDocUrl;
+    }
+
+    public String getUserZoneCacheId() {
+        return userZoneCacheId;
+    }
+
+    public void setUserZoneCacheId(String userZoneCacheId) {
+        this.userZoneCacheId = userZoneCacheId;
     }
 }

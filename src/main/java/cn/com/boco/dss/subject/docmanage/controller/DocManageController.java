@@ -38,6 +38,18 @@ public class DocManageController {
     }
 
     /**
+     * 获取文件列表(优化版本)
+     *
+     * @param jsonObject
+     * @return
+     */
+    @PostMapping("/doclist")
+    @ResponseBody
+    private JsonData getDocListWithUserZoneCache(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
+        return docManageService.getDocListWithUserZoneCache(jsonObject, request);
+    }
+
+    /**
      * 根据指定的文件名称搜索文件
      *
      * @param jsonObject
