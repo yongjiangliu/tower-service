@@ -41,23 +41,13 @@ public class TowerForMysql {
         sb.append(" p.TypeName	塔型, ");
         sb.append(" CASE m.AddressCode WHEN 'NULL' THEN	'' ELSE m.AddressCode END	站址编码, ");
         sb.append(" CASE m.TowerName WHEN 'NULL' THEN	'' ELSE m.TowerName	END 站名, ");
-        sb.append(" CASE m.Address WHEN 'NULL' THEN	'' ELSE m.Address END	详细地址, ");
-        sb.append(" CASE m.TowerHeight WHEN 'NULL' THEN	'' ELSE m.TowerHeight END	塔高, ");
-        sb.append(" q.TypeName	场景, ");
-        sb.append(" m.AntennaCount 天线数量,");
-        sb.append(" m.AntennaCount5G	5G天线数量, ");
-        sb.append(" m.AntennaPloEmptyCount	空余支架数量, ");
-        sb.append(" r.StatusName	铁塔状态, ");
-        sb.append(" m.RiskLevel	风险评级 ");
+        sb.append(" CASE m.RiskLevel WHEN 1 THEN '严重' WHEN 2 THEN '一般' ELSE '无' END	隐患级别, ");
+        sb.append(" CASE m.Status WHEN 1 THEN '巡检中'  WHEN 2 THEN '检测中' WHEN 1 THEN '整治中' ELSE '无' END	状态 ");
         sb.append(" from dim_ne_tower m ");
         sb.append(" LEFT JOIN dim_geo_area n ");
         sb.append(" on m.AreaID =n.AreaID ");
         sb.append(" LEFT JOIN dim_type_tower_shape p ");
         sb.append(" ON m.TowerShapeType = p.TypeID ");
-        sb.append(" LEFT JOIN dim_type_scene q ");
-        sb.append(" on m.SceneType = q.TypeID ");
-        sb.append(" LEFT JOIN dim_status_tower r ");
-        sb.append(" on m.Status = r.StatusID ");
         if (!StringUtils.isBlank(areaID)) {
             sb.append(" where m.AreaID = ? ");
             queryList.add(areaID);
