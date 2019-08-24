@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ConfigList>
+    <Lists>
+        <ListInfo ListKey="List">
+            <Items>
+                <ItemInfo name="riskTableData-detection" value="SELECT
+	'' risKImg,
+	t1.DataIndex dataIndex,
+	t1.TowerID towerID,
+	t2.TowerName towerName,
+	t3.RiskName riskName,
+	DATE_FORMAT(t1.RecordDate, '%Y-%m-%d') recordDate,
+	t1.RiskLevel riskLevel,
+	t4.ProvinceName provinceName,
+	t4.AreaName areaName,
+	t2.Location location,
+	t1.AddressCode addressCode,
+	t1.CheckDataIndex checkDataIndex,
+	t1.DetectionDataIndex detectionDataIndex,
+	t5.ConstractCode constractCode,
+	'detection' workOrderType
+FROM
+	dw_tower_risk t1,
+	dim_ne_tower t2,
+	dim_risk t3,
+	dim_geo_area t4,
+	dw_tower_detection t5
+WHERE
+	t1.TowerID = t2.TowerID
+AND t1.RiskID = t3.RiskID
+AND t2.AreaID = t4.AreaID
+AND t1.RiskStatus = 0
+AND t1.DetectionDataIndex = t5.DataIndex "
+                          Property1="risKImg:图片,dataIndex:隐患ID,towerID:塔ID,riskName:隐患名称,
+                          recordDate:日期,areaName:地市, location:区县, addressCode:站址编码,
+                          riskLevel:隐患级别,checkDataIndex:巡检ID,detectionDataIndex:检测ID,provinceName:省"></ItemInfo>
+
+                <ItemInfo name="riskTableData-check" value="SELECT
+		'' risKImg,
+		t1.DataIndex dataIndex,
+		t1.TowerID towerID,
+		t2.TowerName towerName,
+		t3.RiskName riskName,
+		DATE_FORMAT(t1.RecordDate, '%Y-%m-%d') recordDate,
+		t1.RiskLevel riskLevel,
+		t4.ProvinceName provinceName,
+		t4.AreaName areaName,
+		t2.Location location,
+		t1.AddressCode addressCode,
+		t1.CheckDataIndex checkDataIndex,
+		t1.DetectionDataIndex detectionDataIndex,
+		t5.ConstractCode constractCode,
+		'check' workOrderType
+	FROM
+		dw_tower_risk t1,
+		dim_ne_tower t2,
+		dim_risk t3,
+		dim_geo_area t4,
+		dw_tower_check t5
+	WHERE
+		t1.TowerID = t2.TowerID
+	AND t1.RiskID = t3.RiskID
+	AND t2.AreaID = t4.AreaID
+	AND t1.RiskStatus = 0
+	AND t1.CheckDataIndex = t5.DataIndex"  ></ItemInfo>
+
+
+                <ItemInfo name="gridData-check" value="SELECT
+	t1.DataIndex ID,
+
+	CASE
+WHEN t6.CheckDataIndex IS NULL THEN
+	'repair'
+WHEN t6.CheckDataIndex = 0 THEN
+	'repair'
+ELSE
+	'check'
+END workOrderType,
+	t6.DataIndex RiskID,
+	t6.RiskName RiskName,
+	DATE_FORMAT(t6.RecordDate, '%Y-%m-%d') RiskDate,
+	t1.TowerID TowerID,
+	t2.AddressCode AddressCode,
+	t2.TowerName TowerName,
+	t3.ProvinceName ProvinceName,
+	t3.AreaName AreaName,
+	t2.Location city,
+	t1.constractCode constractCode,
+	'' path
+FROM
+	dw_tower_check t1
+JOIN dim_ne_tower t2 ON t1.TowerID = t2.TowerID
+JOIN dim_geo_area t3 ON t2.AreaID = t3.AreaID
+LEFT JOIN (
+	SELECT
+		t4.DataIndex DataIndex,
+		t4.CheckDataIndex CheckDataIndex,
+		t4.RecordDate RecordDate,
+		t5.RiskName RiskName
+	FROM
+		dw_tower_risk t4
+	JOIN dim_risk t5 ON t4.RiskID = t5.RiskID
+) t6 ON t1.DataIndex = t6.CheckDataIndex
+WHERE
+	t1.STATUS = 1 "
+                          Property1="ID:巡检ID/检测ID,workOrderType:类别,RiskID:隐患ID,RiskName:隐患名称,RiskDate:记录日期,TowerID:塔ID,AddressCode:站址编码,TowerName:站址名称,ProvinceName:省,AreaName:地市,city:区县,path:图片,constractCode:合同号"></ItemInfo>
+                <ItemInfo name="gridData-detection" value="SELECT
+	t1.DataIndex ID,
+	CASE
+WHEN t6.DetectionDataIndex IS NULL THEN
+	'repair'
+WHEN t6.DetectionDataIndex = 0 THEN
+	'repair'
+ELSE
+	'detection'
+END workOrderType,
+	t6.DataIndex RiskID,
+	t6.RiskName RiskName,
+	DATE_FORMAT(t6.RecordDate, '%Y-%m-%d') RiskDate,
+	t1.TowerID TowerID,
+	t2.AddressCode AddressCode,
+	t2.TowerName TowerName,
+	t3.ProvinceName,
+	t3.AreaName AreaName,
+	t2.Location city,t1.constractCode constractCode,
+	'' path
+FROM
+	dw_tower_detection t1
+JOIN dim_ne_tower t2 ON t1.TowerID = t2.TowerID
+JOIN dim_geo_area t3 ON t2.AreaID = t3.AreaID
+LEFT JOIN (
+	SELECT
+		t4.DataIndex DataIndex,
+		t4.DetectionDataIndex DetectionDataIndex,
+		t4.RecordDate RecordDate,
+		t5.RiskName RiskName
+	FROM
+		dw_tower_risk t4
+	JOIN dim_risk t5 ON t4.RiskID = t5.RiskID
+) t6 ON t1.DataIndex = t6.DetectionDataIndex
+WHERE
+	t1.STATUS = 2 "
+                          Property1="ID:巡检ID/检测ID,workOrderType:类别,RiskID:隐患ID,RiskName:隐患名称,RiskDate:记录日期,TowerID:塔ID,AddressCode:站址编码,TowerName:站址名称,ProvinceName:省,AreaName:地市,city:区县,path:图片"></ItemInfo>
+                <ItemInfo name="riskInfo"
+                          value="SELECT	t1.DataIndex DataIndex,	t1.RiskPosition RiskPosition,t2.RiskName RiskName,
+                          t1.CheckDataIndex CheckDataIndex,	t1.DetectionDataIndex DetectionDataIndex FROM
+                          dw_tower_risk t1 JOIN dim_risk t2 ON t1.RiskID = t2.RiskID
+                          WHERE RepairDateIndex is null AND TowerID = ? AND RepairResult = 0 AND RiskStatus = 1"
+                          Property1="DataIndex:隐患ID,RiskPosition:隐患部位,RiskName:隐患名称,CheckDataIndex:巡检记录ID,DetectionDataIndex:检测记录ID"></ItemInfo>
+                <ItemInfo name="grid-check" value="SELECT
+	t1.ConstractCode constractCode,
+	DATE_FORMAT(t1.CheckDate, '%Y-%m-%d') dateTime,
+	t2.AddressCode addressCode,
+	t3.TypeName typeName,
+	t2.TowerName towerName,
+	t2.RiskLevel riskLevel,
+	t2.CheckRiskCountA riskCountA,
+	t2.CheckRiskCount-t2.CheckRiskCountA riskCountB
+FROM
+	dw_tower_check t1
+JOIN dim_ne_tower t2 ON t1.TowerID = t2.TowerID
+JOIN dim_type_tower_shape t3 ON t2.TowerShapeType = t3.TypeID
+WHERE
+	t1.`Status` = 1 " Property1="constractCode:合同号,dateTime:下发日期,addressCode:站址编码,typeName:塔型,towerName:站址名称,riskLevel:隐患级别,riskCountA:严重隐患数量,riskCountB:一般隐患数量,"></ItemInfo>
+                <ItemInfo name="grid-detection" value="SELECT
+	t1.ConstractCode constractCode,
+	DATE_FORMAT(t1.DetectionDate, '%Y-%m-%d') dateTime,
+	t2.AddressCode addressCode,
+	t3.TypeName typeName,
+	t2.TowerName towerName,
+	t2.RiskLevel riskLevel,
+	t2.DetectionRiskCountA riskCountA,
+	t2.DetectionRiskCount-t2.DetectionRiskCountA riskCountB
+FROM
+	dw_tower_detection t1
+JOIN dim_ne_tower t2 ON t1.TowerID = t2.TowerID
+JOIN dim_type_tower_shape t3 ON t2.TowerShapeType = t3.TypeID
+WHERE
+	t1.`Status` = 2 " Property1=""></ItemInfo>
+                <ItemInfo name="grid-repair" value="SELECT
+	t1.ConstractCode constractCode,
+	DATE_FORMAT(t1.UpdateDate, '%Y-%m-%d') dateTime,
+	t2.AddressCode addressCode,
+	t3.TypeName typeName,
+	t2.TowerName towerName,
+	t2.RiskLevel riskLevel,
+	t2.DetectionRiskCountA + t2.CheckRiskCountA riskCountA,
+	t2.DetectionRiskCount + t2.CheckRiskCount - t2.CheckRiskCountA - t2.DetectionRiskCountA riskCountB
+FROM
+	dw_tower_repair t1
+JOIN dim_ne_tower t2 ON t1.TowerID = t2.TowerID
+JOIN dim_type_tower_shape t3 ON t2.TowerShapeType = t3.TypeID
+WHERE
+	t1.`Status` = 0 " Property1=""></ItemInfo>
+            </Items>
+        </ListInfo>
+    </Lists>
+</ConfigList>
