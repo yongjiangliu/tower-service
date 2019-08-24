@@ -42,15 +42,6 @@ public class TowerDetailsService {
     private TowerService towerService;
 
     @Autowired
-    private TowerCheckService towerCheckService;
-
-    @Autowired
-    private TowerDetectionService towerDetectionService;
-
-    @Autowired
-    private TowerRepairService towerRepairService;
-
-    @Autowired
     private TowerDetailsForMysql towerDetailsForMysql;
 
     @Autowired

@@ -15,7 +15,12 @@ import java.io.Serializable;
 @Entity
 @Table(name = "dim_status_tower")
 public class StatusTower implements Serializable {
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Id
     @Column(name = "StatusID")
     private String statusID;
 
