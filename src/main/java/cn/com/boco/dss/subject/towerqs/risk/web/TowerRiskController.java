@@ -1,57 +1,49 @@
 package cn.com.boco.dss.subject.towerqs.risk.web;
 
 
-import cn.com.boco.dss.common.data.DataColumn;
-import cn.com.boco.dss.common.data.DataRow;
-import cn.com.boco.dss.common.data.DataTable;
-import cn.com.boco.dss.common.data.JsonData;
-import cn.com.boco.dss.common.util.StringUtil;
+import java.io.File;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 
-import cn.com.boco.dss.config.user.service.UserInfoService;
-import cn.com.boco.dss.config.xml.ItemInfo;
-
-import cn.com.boco.dss.data.DbHelper;
-import cn.com.boco.dss.database.SqlQuery;
-import cn.com.boco.dss.framework.SysSettings;
-
-import cn.com.boco.dss.framework.security.configuration.JwtUtil;
-import cn.com.boco.dss.framework.security.domain.TokenUser;
-import cn.com.boco.dss.framework.security.web.TokenUserUtils;
-import cn.com.boco.dss.subject.common.helper.*;
-import cn.com.boco.dss.subject.towerqs.risk.domain.TowerRisk;
-import cn.com.boco.dss.subject.towerqs.risk.service.TowerRiskService;
-import cn.com.boco.dss.webcore.data.commondata.CommonData;
-
-import com.alibaba.fastjson.JSON;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import io.jsonwebtoken.Claims;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.crypto.Data;
-
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.sql.Types;
-import java.util.*;
+import cn.com.boco.dss.common.data.DataRow;
+import cn.com.boco.dss.common.data.DataTable;
+import cn.com.boco.dss.common.data.JsonData;
+import cn.com.boco.dss.common.util.StringUtil;
+import cn.com.boco.dss.config.xml.ItemInfo;
+import cn.com.boco.dss.database.SqlQuery;
+import cn.com.boco.dss.framework.security.domain.TokenUser;
+import cn.com.boco.dss.framework.security.web.TokenUserUtils;
+import cn.com.boco.dss.subject.common.helper.FilePath;
+import cn.com.boco.dss.subject.common.helper.FilePathUtil;
+import cn.com.boco.dss.subject.common.helper.FileTypeEnum;
+import cn.com.boco.dss.subject.common.helper.ToolUtil;
+import cn.com.boco.dss.subject.towerqs.risk.domain.TowerRisk;
+import cn.com.boco.dss.subject.towerqs.risk.service.TowerRiskService;
+import cn.com.boco.dss.webcore.data.commondata.CommonData;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "铁塔隐患记录表", description = "铁塔隐患记录表")
 @Controller
@@ -65,9 +57,6 @@ public class TowerRiskController {
 
     @Autowired
     private TowerRiskService trs;
-
-    @Autowired
-    private UserInfoService userInfoService;
 
     @Autowired
     private SqlQuery sqlQuery;

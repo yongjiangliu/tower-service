@@ -1,24 +1,13 @@
 package cn.com.boco.dss.subject.towerqs.repair.web;
 
-import cn.com.boco.dss.common.DateHelper;
-import cn.com.boco.dss.common.data.JsonData;
-import cn.com.boco.dss.subject.common.gsonadapter.GsonUtil;
-import cn.com.boco.dss.subject.common.helper.FilePath;
-import cn.com.boco.dss.subject.common.helper.FilePathUtil;
-import cn.com.boco.dss.subject.common.helper.FileTypeEnum;
-import cn.com.boco.dss.subject.towerqs.check.domain.TowerCheck;
-import cn.com.boco.dss.subject.towerqs.repair.domain.TowerRepair;
-import cn.com.boco.dss.subject.towerqs.repair.service.TowerRepairService;
-import cn.com.boco.dss.subject.towerqs.risk.domain.TowerRisk;
-import cn.com.boco.dss.subject.towerqs.risk.service.TowerRiskService;
-import cn.com.boco.dss.subject.towerqs.tower.domain.Tower;
-import cn.com.boco.dss.subject.towerqs.tower.service.TowerService;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -28,12 +17,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import cn.com.boco.dss.common.DateHelper;
+import cn.com.boco.dss.common.data.JsonData;
+import cn.com.boco.dss.subject.common.gsonadapter.GsonUtil;
+import cn.com.boco.dss.subject.common.helper.FilePath;
+import cn.com.boco.dss.subject.common.helper.FilePathUtil;
+import cn.com.boco.dss.subject.common.helper.FileTypeEnum;
+import cn.com.boco.dss.subject.towerqs.repair.domain.TowerRepair;
+import cn.com.boco.dss.subject.towerqs.repair.service.TowerRepairService;
+import cn.com.boco.dss.subject.towerqs.risk.domain.TowerRisk;
+import cn.com.boco.dss.subject.towerqs.risk.service.TowerRiskService;
+import cn.com.boco.dss.subject.towerqs.tower.domain.Tower;
+import cn.com.boco.dss.subject.towerqs.tower.service.TowerService;
+import io.swagger.annotations.Api;
 
 @Api(value = "整治结果提交", description = "整治结果提交")
 @Controller

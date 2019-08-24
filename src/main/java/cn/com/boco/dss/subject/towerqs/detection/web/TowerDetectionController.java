@@ -128,11 +128,69 @@ public class TowerDetectionController {
 			risk.setResourceCode(StringUtil.isNullOrEmpty(towerDetection.getResourceID())?tower.getResourceCode():towerDetection.getResourceID());
 		}
 		towerRiskService.saveAll(riskList);
+		backfillTower(tower,towerDetection,riskList);
+		towerService.save(tower);
 		return towerDetection;
+	}
+	
+	private void backfillTower(Tower tower,TowerDetection detection, List<TowerRisk> riskList) {
+		if(StringUtil.isBlank(detection.getCoordinateE())){
+			tower.setCoordinateE(detection.getCoordinateE());
+		}
+		if(StringUtil.isBlank(detection.getCoordinateN())) {
+			tower.setCoordinateN(detection.getCoordinateN());
+		}
+		if(detection.getTowerHeight()!=null) {
+			tower.setTowerHeight(detection.getTowerHeight());
+		}
+		if(detection.getElevationHeight()!=null) {
+			tower.setElevationHeight(detection.getElevationHeight());
+		}
+		if(detection.getAntennaCount()!=null) {
+			tower.setAntennaCount(detection.getAntennaCount());
+		}
+		if(detection.getAntennaCount5G()!=null) {
+			tower.setAntennaCount5G(detection.getAntennaCount5G());
+		}
+		if(detection.getAntennaPloEmptyCount()!=null) {
+			tower.setAntennaPloEmptyCount(detection.getAntennaPloEmptyCount());
+		}
+		if(detection.getAntennaPlotCount()!=null) {
+			tower.setAntennaPlotCount(detection.getAntennaPlotCount());
+		}
+		if(detection.getAntennaPlotUsedCount()!=null) {
+			tower.setAntennaPlotUsedCount(detection.getAntennaPlotUsedCount());
+		}
+		if(detection.getAntirustThikness()!=null) {
+			tower.setAntirustThikness(detection.getAntirustThikness());
+		}
+		int detectionRiskCount = 0;
+		int detectionRiskCountA = 0;
+		for(TowerRisk risk : riskList) {
+			if(risk.getRiskLevel()!=null&&risk.getRiskLevel().equals(1)) {
+				detectionRiskCountA++;
+			}
+			detectionRiskCount++;
+		}
+		if(tower.getDetectionRiskCount()==null) {
+			tower.setDetectionRiskCount(detectionRiskCount);
+		}
+		else {
+			tower.setDetectionRiskCount(detectionRiskCount+tower.getDetectionRiskCount());
+		}
+		if(tower.getDetectionRiskCountA()==null) {
+			tower.setDetectionRiskCountA(detectionRiskCountA);
+		}
+		else {
+			tower.setDetectionRiskCountA(detectionRiskCountA+tower.getDetectionRiskCountA());
+		}
 	}
 
 	private void saveTowerImgFiles(MultipartFile[] towerImgFiles, FilePath filePath) {
 		String folderPath = FilePathUtil.getFilePath(filePath, FileTypeEnum.detection_towerImg);
+		saveFiles(towerImgFiles, folderPath);
+		
+		folderPath = FilePathUtil.getFilePath(filePath, FileTypeEnum.towerImg);
 		saveFiles(towerImgFiles, folderPath);
 	}
 
