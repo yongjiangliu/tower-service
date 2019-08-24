@@ -68,10 +68,11 @@ public class TowerRepairService {
 
 
         List<TowerRepair> trList = new ArrayList<TowerRepair>();
-        for (Integer id : repair.getRiskIds()) {
-            TowerRepair repairNew = new TowerRepair();
+        for(TowerRisk risk : riskList) {
+        	TowerRepair repairNew = new TowerRepair();
             BeanUtils.copyProperties(repair, repairNew);
-            repairNew.setRiskDataIndex(id);
+            repairNew.setRiskDataIndex(risk.getDataIndex());
+            repairNew.setDataIndex(risk.getRepairDateIndex());
             trList.add(repairNew);
         }
         saveAll(trList);
