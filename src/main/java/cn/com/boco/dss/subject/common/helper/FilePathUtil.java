@@ -20,6 +20,8 @@ public class FilePathUtil {
 
     private static String detection_path = path("detection");
 
+    private static String towerImg = path("tower");
+
 
 //整治图片文件路径
     /**
@@ -302,6 +304,10 @@ public class FilePathUtil {
 
             case check_report:
                 path += strReplace(check_report_path, filePath);
+                break;
+
+            case towerImg:
+                path += strReplace(towerImg, filePath);
                 break;
         }
         return path;
