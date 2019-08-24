@@ -59,12 +59,12 @@ public class CheckUserZoneUtil {
                 if (levelId == ZoneConstant.ZONE_LEVEL_PROVINCE) {
                     userStatus = 1;//省端用户
                     Zone zoneProvince = zoneService.findZoneByZoneID(proviceId);
-                    userDocUrl = "通信铁塔资料/中华人民共和国/" + zoneProvince.getName() + "/";
+                    userDocUrl = "通信塔资料/中华人民共和国/" + zoneProvince.getName() + "/";
                 }
                 else if (levelId == ZoneConstant.ZONE_LEVEL_AREA) {
                     userStatus = 2;//某个具体的地市端用户 比如成都市 只能看到成都市下所有的区县
                     Zone zoneProvince = zoneService.findZoneByZoneID(proviceId);
-                    userDocUrl = "通信铁塔资料/中华人民共和国/" + zoneProvince.getName() + "/" + zone.getName() + "/";
+                    userDocUrl = "通信塔资料/中华人民共和国/" + zoneProvince.getName() + "/" + zone.getName() + "/";
                 }
                 else if (levelId == ZoneConstant.ZONE_LEVEL_COUNTY) {
                     userStatus = 3;//区县
