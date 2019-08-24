@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -37,109 +39,117 @@ import io.swagger.annotations.Api;
 @Api(value = "整治结果提交", description = "整治结果提交")
 @Controller
 public class TowerRepairController {
+	Logger logger = LoggerFactory.getLogger(TowerRepairController.class);
 
-    @Value("${dss.tower.img.save-path}")
-    private String savePath;
-    @Value("${dss.tower.img.read-path}")
-    private String readPath;
+	@Value("${dss.tower.img.save-path}")
+	private String savePath;
+	@Value("${dss.tower.img.read-path}")
+	private String readPath;
 
-    @Autowired
-    private TowerRepairService trs;
+	@Autowired
+	private TowerRepairService trs;
 
-    @Autowired
-    private TowerRiskService riskService;
+	@Autowired
+	private TowerRiskService riskService;
 
-    @Autowired
-    private TowerService towerService;
+	@Autowired
+	private TowerService towerService;
 
-    @RequestMapping(value = "dss/TowerService/repair/repairSubmit", method = RequestMethod.POST)
-    @ResponseBody
-    public JsonData repairSubmit(@RequestParam(value = "towerImg") MultipartFile[] towerImg,
-                                 @RequestParam(value = "riskBeforeImgs") MultipartFile[] riskBeforeImgs,
-                                 @RequestParam(value = "riskIngImgs") MultipartFile[] riskIngImgs,
-                                 @RequestParam(value = "riskAfterImgs") MultipartFile[] riskAfterImgs,
-                                 @RequestParam(value = "riskReport") MultipartFile[] riskReport,
-                                 @RequestParam(value = "repair") String repair,
-                                 @RequestParam(value = "risk") String risk
-    ) {
-        JsonData jd = new JsonData();
+	@RequestMapping(value = "dss/TowerService/repair/repairSubmit", method = RequestMethod.POST)
+	@ResponseBody
+	public JsonData repairSubmit(@RequestParam(value = "towerImg") MultipartFile[] towerImg,
+			@RequestParam(value = "riskBeforeImgs") MultipartFile[] riskBeforeImgs,
+			@RequestParam(value = "riskIngImgs") MultipartFile[] riskIngImgs,
+			@RequestParam(value = "riskAfterImgs") MultipartFile[] riskAfterImgs,
+			@RequestParam(value = "riskReport") MultipartFile[] riskReport,
+			@RequestParam(value = "repair") String repair, @RequestParam(value = "risk") String risk) {
+		JsonData jd = new JsonData();
 
-        TowerRepair towerRepair = new Gson().fromJson(repair, TowerRepair.class);
-        List<TowerRisk> towerRisks = new Gson().fromJson(risk, new TypeToken<List<TowerRisk>>() {
-        }.getType());
+		TowerRepair towerRepair = new Gson().fromJson(repair, TowerRepair.class);
+		List<TowerRisk> towerRisks = new Gson().fromJson(risk, new TypeToken<List<TowerRisk>>() {
+		}.getType());
 
-        FilePath filePath = trs.insertAndUpdate(towerRepair, towerRisks);
-        upLoadFile(filePath, towerImg, FileTypeEnum.repair_towerImg);
-        upLoadFile(filePath, riskBeforeImgs, FileTypeEnum.repair_riskImg_before);
-        upLoadFile(filePath, riskIngImgs, FileTypeEnum.repair_riskImg_ing);
-        upLoadFile(filePath, riskAfterImgs, FileTypeEnum.repair_riskImg_after);
-        upLoadFile(filePath, riskReport, FileTypeEnum.repair_report);
-        jd.setData("SUCCESS");
-        return jd;
-    }
+		FilePath filePath = trs.insertAndUpdate(towerRepair, towerRisks);
+		upLoadFile(filePath, towerImg, FileTypeEnum.repair_towerImg);
+		upLoadFile(filePath, riskBeforeImgs, FileTypeEnum.repair_riskImg_before);
+		upLoadFile(filePath, riskIngImgs, FileTypeEnum.repair_riskImg_ing);
+		upLoadFile(filePath, riskAfterImgs, FileTypeEnum.repair_riskImg_after);
+		upLoadFile(filePath, riskReport, FileTypeEnum.repair_report);
+		jd.setData("SUCCESS");
+		return jd;
+	}
 
-    private void upLoadFile(FilePath filePath, MultipartFile[] files, FileTypeEnum fileTypeEnum) {
-        for (MultipartFile file : files) {
-            String path = savePath + FilePathUtil.getFilePath(filePath, fileTypeEnum) + file.getOriginalFilename();
-            File newFile = new File(path);
-            if (!(newFile.getParentFile().exists() && newFile.getParentFile().isDirectory())) {
-                newFile.getParentFile().mkdirs();
-            }
-            try {
-                file.transferTo(newFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+	private void upLoadFile(FilePath filePath, MultipartFile[] files, FileTypeEnum fileTypeEnum) {
+		for (MultipartFile file : files) {
+			String path = savePath + FilePathUtil.getFilePath(filePath, fileTypeEnum) + file.getOriginalFilename();
+			File newFile = new File(path);
+			if (!(newFile.getParentFile().exists() && newFile.getParentFile().isDirectory())) {
+				newFile.getParentFile().mkdirs();
+			}
+			try {
+				file.transferTo(newFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
-    @RequestMapping(value = "dss/TowerService/repair/insertnulldata", method = RequestMethod.POST)
-    @ResponseBody
-    public JsonData insertnulldata(@RequestParam(value = "riskIds") String  riskIds,
-                                 @RequestParam(value = "towerId") String towerId) {
-        JsonData jd = new JsonData();
-        Gson gson = GsonUtil.buildGson();
-        List<String> riskIdList = gson.fromJson(riskIds, new TypeToken<List<String>>() {
-        }.getType());
+	@RequestMapping(value = "dss/TowerService/repair/insertnulldata", method = RequestMethod.POST)
+	@ResponseBody
+	public JsonData insertnulldata(@RequestParam(value = "riskIds") String riskIds) {
+		JsonData jd = new JsonData();
+		try {
+			Gson gson = GsonUtil.buildGson();
+			List<Integer> riskIdList = gson.fromJson(riskIds, new TypeToken<List<Integer>>() {
+			}.getType());
 
-        List<TowerRepair> repairList = new ArrayList<TowerRepair>();
-        List<Integer> ids = new ArrayList<Integer>();
-        for (String id : riskIdList) {
-            ids.add(Integer.parseInt(id));
-            TowerRepair repair = new TowerRepair();
-            repair.setRiskDataIndex(Integer.parseInt(id));
-            repair.setTowerID(towerId);
-            repair.setStatus(0);
-            repair.setUpdateDate(DateHelper.getDateNow());
-            repairList.add(repair);
-        }
-        trs.saveAll(repairList);
-        Tower tower = towerService.findById(towerId);
-        tower.setStatus("3");
-        towerService.save(tower);
-        List<TowerRisk> riskList = riskService.findAllById(ids);
-        for (TowerRisk risk : riskList) {
-            for (TowerRepair repair : repairList) {
-                if (risk.getDataIndex() == repair.getRiskDataIndex()) {
-                    risk.setRepairDateIndex(repair.getDataIndex());
-                }
+			List<TowerRisk> riskList = riskService.findAllById(riskIdList);
+			List<TowerRepair> repairList = new ArrayList<TowerRepair>();
+			List<String> towerIdList = new ArrayList<String>();
+			for (TowerRisk risk : riskList) {
+				towerIdList.add(risk.getTowerID());
+				TowerRepair repair = new TowerRepair();
+				repair.setRiskDataIndex(risk.getDataIndex());
+				repair.setTowerID(risk.getTowerID());
+				repair.setStatus(0);
+				repair.setUpdateDate(DateHelper.getDateNow());
+				repairList.add(repair);
+			}
+			repairList = trs.saveAll(repairList);
+			List<Tower> towerList = towerService.findAll(towerIdList);
+			for (Tower tower : towerList) {
+				tower.setStatus("3");
+			}
+			towerService.saveAll(towerList);
+			for (TowerRisk risk : riskList) {
+				risk.setRiskStatus(1);
+				for (TowerRepair repair : repairList) {
+					if (risk.getDataIndex().equals(repair.getRiskDataIndex())) {
+						risk.setRepairDateIndex(repair.getDataIndex());
+						break;
+					}
 
-            }
-        }
-        riskService.saveAll(riskList);
-        jd.setData("SUCCESS");
-        return jd;
+				}
+			}
+			riskService.saveAll(riskList);
+			jd.setData("SUCCESS");
+		} catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
+			jd.setStatus("100");
+			jd.setData("Failed.");
+		}
+		return jd;
 
+	}
 
-    }
-
-
-    @RequestMapping(value = "dss/TowerService/repair/findall", method = RequestMethod.POST)
-    @ResponseBody
-    public JsonData repairSubmit(@RequestParam(value = "p") String p, @RequestParam(value = "p1") String p1, @RequestParam(value = "file") MultipartFile[] file, @RequestParam(value = "file1") MultipartFile[] file1, HttpServletRequest request) throws IOException {
-        JsonData jd = new JsonData();
-        TowerRepair tr = new Gson().fromJson(request.getParameter("p"), TowerRepair.class);
-        TowerRisk risk = new Gson().fromJson(request.getParameter("p1"), TowerRisk.class);
+	@RequestMapping(value = "dss/TowerService/repair/findall", method = RequestMethod.POST)
+	@ResponseBody
+	public JsonData repairSubmit(@RequestParam(value = "p") String p, @RequestParam(value = "p1") String p1,
+			@RequestParam(value = "file") MultipartFile[] file, @RequestParam(value = "file1") MultipartFile[] file1,
+			HttpServletRequest request) throws IOException {
+		JsonData jd = new JsonData();
+		TowerRepair tr = new Gson().fromJson(request.getParameter("p"), TowerRepair.class);
+		TowerRisk risk = new Gson().fromJson(request.getParameter("p1"), TowerRisk.class);
 
 //        for (MultipartFile m : file) {
 //            String path = "D:/dd2222/" + m.getOriginalFilename();
@@ -155,11 +165,11 @@ public class TowerRepairController {
 //        new Gson().toJson(trs.findAll());
 //        new Gson().toJson(riskService.findAll());
 //        jd.setData(trs.findAll());
-        //        List<String> strings = new Gson().fromJson(request.getParameter("riskIds"), new TypeToken<List<String>>() {
+		// List<String> strings = new Gson().fromJson(request.getParameter("riskIds"),
+		// new TypeToken<List<String>>() {
 //        }.getType());
-        trs.insertAndUpdate(tr, Arrays.asList(risk));
-        return jd;
-    }
-
+		trs.insertAndUpdate(tr, Arrays.asList(risk));
+		return jd;
+	}
 
 }

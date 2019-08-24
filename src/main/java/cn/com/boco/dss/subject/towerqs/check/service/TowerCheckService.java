@@ -10,22 +10,19 @@ import org.springframework.transaction.annotation.Transactional;
 import cn.com.boco.dss.database.JpaTowerConfig;
 import cn.com.boco.dss.subject.towerqs.check.domain.TowerCheck;
 import cn.com.boco.dss.subject.towerqs.check.repository.TowerCheckRepository;
-import cn.com.boco.dss.subject.towerqs.common.geo.area.service.AreaService;
-import cn.com.boco.dss.subject.towerqs.risk.service.TowerRiskService;
-import cn.com.boco.dss.subject.towerqs.tower.service.TowerService;
 
 @Service
 public class TowerCheckService {
     @Autowired
     private TowerCheckRepository towerCheckRepository;
-    @Autowired
-    private TowerService ts;
-
-    @Autowired
-    private AreaService as;
-
-    @Autowired
-    private TowerRiskService trs;
+//    @Autowired
+//    private TowerService ts;
+//
+//    @Autowired
+//    private AreaService as;
+//
+//    @Autowired
+//    private TowerRiskService trs;
 
     public TowerCheck save(TowerCheck towerCheck) {
       return   towerCheckRepository.save(towerCheck);

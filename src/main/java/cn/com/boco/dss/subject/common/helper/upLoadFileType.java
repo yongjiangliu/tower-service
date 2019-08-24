@@ -1,7 +1,5 @@
 package cn.com.boco.dss.subject.common.helper;
 
-import java.io.File;
-
 public class upLoadFileType {
 
 
