@@ -1,5 +1,33 @@
 package cn.com.boco.dss.subject.towerqs.check.web;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import cn.com.boco.dss.common.DateHelper;
 import cn.com.boco.dss.common.data.DataColumn;
@@ -21,58 +49,27 @@ import cn.com.boco.dss.subject.towerqs.check.domain.TowerCheck;
 import cn.com.boco.dss.subject.towerqs.check.service.TowerCheckService;
 import cn.com.boco.dss.subject.towerqs.common.geo.area.domain.Area;
 import cn.com.boco.dss.subject.towerqs.common.geo.area.service.AreaService;
-import cn.com.boco.dss.subject.towerqs.detection.domain.TowerDetection;
-import cn.com.boco.dss.subject.towerqs.detection.service.TowerDetectionService;
-
-import cn.com.boco.dss.subject.towerqs.repair.domain.TowerRepair;
 import cn.com.boco.dss.subject.towerqs.risk.domain.TowerRisk;
 import cn.com.boco.dss.subject.towerqs.risk.service.TowerRiskService;
 import cn.com.boco.dss.subject.towerqs.tower.domain.Tower;
 import cn.com.boco.dss.subject.towerqs.tower.service.TowerService;
 import cn.com.boco.dss.webcore.data.commondata.CommonData;
-import cn.com.boco.dss.webcore.grid.SmartGridOption;
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-@Api(value = "隐患", description = "隐患")
+@Api(value = "巡检工单")
 @Controller
 public class TowerCheckController {
-
     Logger log = LoggerFactory.getLogger(TowerCheckController.class);
+
     @Value("${dss.tower.img.save-path}")
     private String savePath;
+
     @Value("${dss.tower.img.read-path}")
     private String readPath;
-    @Autowired
-    private TowerCheckService tcs;
 
     @Autowired
-    private TowerDetectionService tds;
+    private TowerCheckService tcs;
 
     @Autowired
     private SqlQuery sqlQuery;
@@ -88,41 +85,47 @@ public class TowerCheckController {
 
     private FilePath filePath = new FilePath();
 
-    @ApiOperation(value = "工单处理 立即下发", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "towerID", value = "towerID", required = true, dataType = "String", paramType = "query", defaultValue = ""),
-            @ApiImplicitParam(name = "workOrderType", value = "workOrderType", required = true, dataType = "String", paramType = "query", defaultValue = "")
-    })
-    @RequestMapping(value = "dss/TowerService/risks/immediatelyIssued", method = RequestMethod.POST)
+    @ApiOperation(value = "巡检工单立即下发接口", notes = "")
+    @PostMapping(value = "dss/TowerService/check/addinitdata")
     @ResponseBody
-    public JsonData immediatelyIssued(@RequestParam(value = "towerID") String towerID, @RequestParam(value = "workOrderType") String workOrderType) {
+    public JsonData addInitCheckList(@RequestParam(value = "towerIds", required = true) String towerIds) {
         JsonData jd = new JsonData();
         try {
-            if (StringUtil.isEqual(workOrderType, "check")) {
-                TowerCheck tc = new TowerCheck();
-                tc.setTowerID(towerID);
-                tc.setStatus(1);
-                tcs.save(tc);
-            } else {
-                TowerDetection td = new TowerDetection();
-                td.setTowerID(towerID);
-                td.setStatus(2);
-                tds.save(td);
+            Gson gson = GsonUtil.buildGson();
+            List<String> towerIdList = gson.fromJson(towerIds, new TypeToken<List<String>>() {
+            }.getType());
+            List<Tower> towerList = towerService.findAll(towerIdList);
+            List<TowerCheck> checkList = new LinkedList<TowerCheck>();
+            for (Tower tower : towerList) {
+                tower.setStatus("1");// 1：已下发巡检工单
+                TowerCheck check = new TowerCheck();
+                check.setTowerID(tower.getTowerID());
+                check.setResourceCode(tower.getResourceCode());
+                check.setAddressCode(tower.getAddressCode());
+                check.setStatus(1);
+                checkList.add(check);
             }
-            jd.setData("SUCCESS");
+            tcs.saveAll(checkList);
+            towerService.saveAll(towerList);
+            jd.setData("Add succeed.");
         } catch (Exception ex) {
-            jd.setData("FAIL");
+            log.error(ex.getMessage(), ex);
+            jd.setStatus("100");
+            jd.setData("Add Failed");
         }
         return jd;
     }
 
-
     @RequestMapping(value = "dss/TowerService/risks/resultubmit")
     @ResponseBody
-    public JsonData resultSubmit(@RequestParam(value = "workOrderType") String workOrderType,
+    public JsonData resultSubmit(@RequestParam(value = "param1") String param1,
                                  @RequestParam(value = "pageIndex") String pageIndex,
                                  @RequestParam(value = "pageSize") String pageSize,
                                  HttpServletRequest request) {
+//        String param1 = request.getParameter("param1");
+//        String pageIndex = request.getParameter("pageIndex");
+//        String pageSize = request.getParameter("pageSize");
+        String workOrderType = param1;
 
         JsonData jd = new JsonData();
         CommonData commonData = getCommonData(getSql(workOrderType), workOrderType, pageIndex, pageSize, request);
@@ -131,17 +134,19 @@ public class TowerCheckController {
         return jd;
     }
 
-    private CommonData getCommonData(StringBuilder sql, String workOrderType, String pageIndex, String pageSize, HttpServletRequest request) {
+    private CommonData getCommonData(StringBuilder sql, String workOrderType, String pageIndex, String pageSize,
+                                     HttpServletRequest request) {
         CommonData cd = new CommonData();
         List<Object> queryList = new ArrayList<Object>();
         List<Integer> queryTypes = new ArrayList<Integer>();
         String zoneId = getZoneId(request);
-        if (!StringUtil.isEqual(zoneId, "-1") && !StringUtil.isNullOrEmpty(zoneId) && !StringUtil.isEqual(zoneId, "280")) {
+        if (!StringUtil.isEqual(zoneId, "-1") && !StringUtil.isNullOrEmpty(zoneId)
+                && !StringUtil.isEqual(zoneId, "280")) {
             sql.append(" AND t2.AreaID = ? ");
             queryList.add(zoneId);
             queryTypes.add(Types.VARCHAR);
         }
-        String name = "";
+//		String name = "";
 //        if (workOrderType.equals("check")) {
 //            name = "grid-check";
 //
@@ -155,7 +160,8 @@ public class TowerCheckController {
         int[] types = ArrayUtils.toPrimitive(queryTypes.toArray(new Integer[queryTypes.size()]));
 
         try {
-            cd = geCommonDatatBySql(sql.toString(), "grid-check", queryList.toArray(), types, Integer.parseInt(pageIndex), Integer.parseInt(pageSize), false);
+            cd = geCommonDatatBySql(sql.toString(), "grid-check", queryList.toArray(), types,
+                    Integer.parseInt(pageIndex), Integer.parseInt(pageSize), false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -190,7 +196,6 @@ public class TowerCheckController {
         JSONObject param1Obj = JSONObject.parseObject(param1);
         String towerID = param1Obj.getString("towerID");
 
-
         List<String> ids = new Gson().fromJson(towerID, new TypeToken<List<String>>() {
         }.getType());
         CommonData result = queryData(ids, Integer.parseInt(pageIndex), Integer.parseInt(pageSize), request);
@@ -205,7 +210,8 @@ public class TowerCheckController {
         return zoneId;
     }
 
-    private CommonData queryData(List<String> towerIds, int pageIndex, int pageSize, HttpServletRequest request) throws Exception {
+    private CommonData queryData(List<String> towerIds, int pageIndex, int pageSize, HttpServletRequest request)
+            throws Exception {
 
         CommonData cd = new CommonData();
         List<Object> queryList = new ArrayList<Object>();
@@ -215,15 +221,14 @@ public class TowerCheckController {
         sqlDetection.append(ToolUtil.findItemInfoByXml("gridData-detection", "config/risk.xml").getValue());
         sqlCheck.append(ToolUtil.findItemInfoByXml("gridData-check", "config/risk.xml").getValue());
         String zoneId = getZoneId(request);
-        if (!StringUtil.isEqual(zoneId, "-1") && !StringUtil.isNullOrEmpty(zoneId) && !StringUtil.isEqual(zoneId, "280")) {
+        if (!StringUtil.isEqual(zoneId, "-1") && !StringUtil.isNullOrEmpty(zoneId)
+                && !StringUtil.isEqual(zoneId, "280")) {
             sqlCheck.append(" AND t2.AreaID = ? ");
-
 
             String areaID = zoneId;
             queryList.add(areaID);
             queryTypes.add(Types.VARCHAR);
         }
-
 
         if (towerIds.size() > 0) {
             sqlCheck.append(" AND ( ");
@@ -235,7 +240,8 @@ public class TowerCheckController {
             sqlCheck.delete(sqlCheck.length() - 3, sqlCheck.length());
             sqlCheck.append(" ) ");
         }
-        if (!StringUtil.isEqual(zoneId, "-1") && !StringUtil.isNullOrEmpty(zoneId) && !StringUtil.isEqual(zoneId, "280")) {
+        if (!StringUtil.isEqual(zoneId, "-1") && !StringUtil.isNullOrEmpty(zoneId)
+                && !StringUtil.isEqual(zoneId, "280")) {
             sqlDetection.append(" AND t2.AreaID = ? ");
             String areaID = zoneId;
             queryList.add(areaID);
@@ -258,9 +264,11 @@ public class TowerCheckController {
         return cd;
     }
 
-    private CommonData geCommonDatatBySql(String sql, String name, Object[] queryParamsArr, int[] queryTypeArr, int pageIndex, int pageSize, boolean isImgPath) throws Exception {
+    private CommonData geCommonDatatBySql(String sql, String name, Object[] queryParamsArr, int[] queryTypeArr,
+                                          int pageIndex, int pageSize, boolean isImgPath) throws Exception {
         String sqlCount = "SELECT COUNT(*) FROM (" + sql + ") TAB ";
-        DataTable dtCount = DbHelper.getDataBySql(sqlCount, queryParamsArr, queryTypeArr, sqlQuery.getConnectSettings());
+        DataTable dtCount = DbHelper.getDataBySql(sqlCount, queryParamsArr, queryTypeArr,
+                sqlQuery.getConnectSettings());
 
         String sqlLimit = "SELECT * FROM (" + sql + ") TAB LIMIT " + (pageIndex - 1) * pageSize + "," + pageSize;
         DataTable dt = DbHelper.getDataBySql(sqlLimit, queryParamsArr, queryTypeArr, sqlQuery.getConnectSettings());
@@ -329,8 +337,7 @@ public class TowerCheckController {
                                  @RequestParam(value = "riskAfterImgs") MultipartFile[] riskAfterImgs,
                                  @RequestParam(value = "riskReport") MultipartFile[] riskReport,
                                  @RequestParam(value = "questionImg") MultipartFile[] questionImg,
-                                 @RequestParam(value = "check") String check,
-                                 @RequestParam(value = "risk") String risk) {
+                                 @RequestParam(value = "check") String check, @RequestParam(value = "risk") String risk) {
         JsonData jd = new JsonData();
         try {
             Gson gson = GsonUtil.buildGson();
@@ -339,6 +346,7 @@ public class TowerCheckController {
             }.getType());
             insertAndUpdate(towerCheck, towerRisks);
             upLoadTowerOrReport(filePath, FileTypeEnum.check_towerImg_before, towerImg);
+            upLoadTowerOrReport(filePath, FileTypeEnum.towerImg, towerImg);
             upLoadRiskImgs(filePath, riskBeforeImgs, FileTypeEnum.check_riskImg_before, towerRisks);
             upLoadRiskImgs(filePath, riskIngImgs, FileTypeEnum.check_riskImg_ing, towerRisks);
             upLoadRiskImgs(filePath, riskAfterImgs, FileTypeEnum.check_riskImg_after, towerRisks);
@@ -358,21 +366,21 @@ public class TowerCheckController {
         try {
             Tower tower = towerService.findById(check.getTowerID());
 
-            //保存check
+            // 保存check
             check.setTowerID(tower.getTowerID());
             check.setResourceCode(tower.getResourceCode());
             check.setAddressCode(tower.getAddressCode());
             check.setStatus(1);// 1：已下巡检工单
             tcs.save(check);
 
-            //更新tower表
+            // 更新tower表
             check.setResourceCode(tower.getResourceCode());
             check.setAddressCode(tower.getAddressCode());
             setTowerByCheck(check, tower);
             setTowerRiskCount(tower);
             towerService.save(tower);
 
-            //保存risk表
+            // 保存risk表
             for (TowerRisk risk : riskList) {
                 risk.setCheckDataIndex(check.getDataIndex());
                 risk.setTowerID(check.getTowerID());
@@ -380,15 +388,15 @@ public class TowerCheckController {
                 risk.setAddressCode(tower.getAddressCode());
                 risk.setRiskImageCount(risk.getImageNameList().size());
                 risk.setRecordDate(new Date());
-                risk.setRepairStatus(0);//施工状态，0已计划（已下单），1施工中，2结束
-                risk.setRiskStatus(risk.getRiskStatus());//隐患状态，0未解决，1-整治中，2-已解决
-                risk.setRepairResult(0);//整治结果，0未解决，1-解决，2-暂停
+                risk.setRepairStatus(0);// 施工状态，0已计划（已下单），1施工中，2结束
+                risk.setRiskStatus(risk.getRiskStatus());// 隐患状态，0未解决，1-整治中，2-已解决
+                risk.setRepairResult(0);// 整治结果，0未解决，1-解决，2-暂停
 
                 risk.setResourceCode(tower.getResourceCode());
             }
             towerRiskService.saveAll(riskList);
 
-            //设置目录
+            // 设置目录
             Area area = areaService.findById(tower.getAreaID());
             setFilePath(area, tower, check, "save");
 
@@ -413,7 +421,8 @@ public class TowerCheckController {
         }
     }
 
-    private void upLoadRiskImgs(FilePath filePath, MultipartFile[] files, FileTypeEnum fileTypeEnum, List<TowerRisk> riskList) {
+    private void upLoadRiskImgs(FilePath filePath, MultipartFile[] files, FileTypeEnum fileTypeEnum,
+                                List<TowerRisk> riskList) {
         if (files.length == 0) {
             return;
         }
@@ -426,10 +435,11 @@ public class TowerCheckController {
                 String imageName = imgNameList.get(i);
                 for (MultipartFile file : files) {
                     if (file.getOriginalFilename().equals(imageName)) {
-                        String fileType = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+                        String fileType = file.getOriginalFilename()
+                                .substring(file.getOriginalFilename().lastIndexOf("."));
 
                         String fileName = risk.getRiskPosition() + "-" + risk.getRiskName() + "-" + i + fileType;
-                        String path = savePath + FilePathUtil.getFilePath(filePath, fileTypeEnum) + fileName;//file.getOriginalFilename();
+                        String path = savePath + FilePathUtil.getFilePath(filePath, fileTypeEnum) + fileName;// file.getOriginalFilename();
                         File newFile = new File(path);
                         if (!(newFile.getParentFile().exists() && newFile.getParentFile().isDirectory())) {
                             newFile.getParentFile().mkdirs();
@@ -445,7 +455,6 @@ public class TowerCheckController {
 
             }
         }
-
 
     }
 
@@ -465,22 +474,25 @@ public class TowerCheckController {
             case check_questionImg:
                 imgNameList = risk.getImageNameListMap().get("imgQuestion");
                 break;
+            default:
+                break;
         }
         return imgNameList;
 
     }
 
-
     private void setTowerRiskCount(Tower tower) {
-        long checkCount = towerRiskService.findCheckCountByLevel(tower.getTowerID(), Arrays.asList(1, 2), Arrays.asList(0));
-        long checkCountA = towerRiskService.findCheckCountByLevel(tower.getTowerID(), Arrays.asList(1), Arrays.asList(0));
+        long checkCount = towerRiskService.findCheckCountByLevel(tower.getTowerID(), Arrays.asList(1, 2),
+                Arrays.asList(0));
+        long checkCountA = towerRiskService.findCheckCountByLevel(tower.getTowerID(), Arrays.asList(1),
+                Arrays.asList(0));
 //        long detectionCount = towerRiskService.findDetectionCountByLevel(tower.getTowerID(),Arrays.asList(1,2), Arrays.asList(0));
 //        long detectionCountA = towerRiskService.findDetectionCountByLevel(tower.getTowerID(), Arrays.asList(1), Arrays.asList(0));
 
         long detectionCount = Long.parseLong(tower.getDetectionRiskCount());
         long detectionCountA = Long.parseLong(tower.getDetectionRiskCountA());
         Integer level = 0;
-        //风险评级，如果以上隐患为0则此值为0，A类不为0，则此值为1，如果A类为0但隐患数量>=5，此值为2，隐患数量<5此值为3
+        // 风险评级，如果以上隐患为0则此值为0，A类不为0，则此值为1，如果A类为0但隐患数量>=5，此值为2，隐患数量<5此值为3
         if (checkCount == 0 && checkCountA == 0 && detectionCount == 0 && detectionCountA == 0) {
             level = 0;
         } else if (checkCountA != 0 && detectionCountA != 0) {
@@ -550,7 +562,6 @@ public class TowerCheckController {
 
     private FilePath setFilePath(Area area, Tower tower, TowerCheck check, String type) {
 
-
         filePath.setProvinceName(area.getProvinceName());
         filePath.setAreaName(area.getAreaName());
         filePath.setLocation(tower.getLocation());
@@ -566,10 +577,8 @@ public class TowerCheckController {
     @ResponseBody
     public JsonData findById(HttpServletRequest request) throws Exception {
         JsonData jd = new JsonData();
-
         List<TowerCheck> check = tcs.findAll();
         jd.setData(check);
-        String str = new Gson().toJson(jd);
         return jd;
     }
 

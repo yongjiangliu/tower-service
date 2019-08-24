@@ -19,5 +19,7 @@ public enum FileTypeEnum {
     check_riskImg_ing,
     check_riskImg_after,
     check_questionImg,
-    check_report
+    check_report,
+
+    towerImg
 }

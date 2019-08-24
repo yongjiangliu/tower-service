@@ -16,7 +16,12 @@ import java.io.Serializable;
 @Table(name = "dim_geo_area")
 public class Area implements Serializable {
 
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Id
     @Column(name = "AreaID")
     private String areaID;
 

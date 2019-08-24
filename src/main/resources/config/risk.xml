@@ -155,7 +155,9 @@ WHERE
 	t2.TowerName towerName,
 	t2.RiskLevel riskLevel,
 	t2.CheckRiskCountA riskCountA,
-	t2.CheckRiskCount-t2.CheckRiskCountA riskCountB
+	t2.CheckRiskCount-t2.CheckRiskCountA riskCountB,
+	t1.DataIndex dateIndex,
+	t1.TowerID towerID
 FROM
 	dw_tower_check t1
 JOIN dim_ne_tower t2 ON t1.TowerID = t2.TowerID
@@ -170,7 +172,9 @@ WHERE
 	t2.TowerName towerName,
 	t2.RiskLevel riskLevel,
 	t2.DetectionRiskCountA riskCountA,
-	t2.DetectionRiskCount-t2.DetectionRiskCountA riskCountB
+	t2.DetectionRiskCount-t2.DetectionRiskCountA riskCountB,
+	t1.DataIndex dateIndex,
+	t1.TowerID towerID
 FROM
 	dw_tower_detection t1
 JOIN dim_ne_tower t2 ON t1.TowerID = t2.TowerID
@@ -185,7 +189,9 @@ WHERE
 	t2.TowerName towerName,
 	t2.RiskLevel riskLevel,
 	t2.DetectionRiskCountA + t2.CheckRiskCountA riskCountA,
-	t2.DetectionRiskCount + t2.CheckRiskCount - t2.CheckRiskCountA - t2.DetectionRiskCountA riskCountB
+	t2.DetectionRiskCount + t2.CheckRiskCount - t2.CheckRiskCountA - t2.DetectionRiskCountA riskCountB,
+	t1.DateIndex dateIndex,
+	t1.TowerID towerID
 FROM
 	dw_tower_repair t1
 JOIN dim_ne_tower t2 ON t1.TowerID = t2.TowerID

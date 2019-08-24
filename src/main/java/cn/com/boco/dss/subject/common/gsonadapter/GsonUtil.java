@@ -8,11 +8,11 @@ public class GsonUtil {
 
 	public static Gson buildGson() {
 		if (gson == null) {
-			gson = new GsonBuilder().registerTypeAdapter(Integer.class, new IntegerDefault0Adapter())
+			gson = new GsonBuilder().registerTypeAdapter(Integer.class, new IntegerDefaultNullAdapter())
 					.registerTypeAdapter(int.class, new IntegerDefault0Adapter())
-					.registerTypeAdapter(Double.class, new DoubleDefault0Adapter())
+					.registerTypeAdapter(Double.class, new DoubleDefaultNullAdapter())
 					.registerTypeAdapter(double.class, new DoubleDefault0Adapter())
-					.registerTypeAdapter(Long.class, new LongDefault0Adapter())
+					.registerTypeAdapter(Long.class, new LongDefaultNullAdapter())
 					.registerTypeAdapter(long.class, new LongDefault0Adapter()).create();
 		}
 		return gson;
