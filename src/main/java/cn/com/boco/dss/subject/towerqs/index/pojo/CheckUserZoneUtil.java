@@ -1,21 +1,22 @@
 package cn.com.boco.dss.subject.towerqs.index.pojo;
 
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import cn.com.boco.dss.common.data.DataTable;
 import cn.com.boco.dss.config.zone.domain.Zone;
-import cn.com.boco.dss.config.zone.service.ZoneLevelService;
 import cn.com.boco.dss.config.zone.service.ZoneService;
 import cn.com.boco.dss.data.DbHelper;
 import cn.com.boco.dss.database.DbSys;
 import cn.com.boco.dss.framework.security.domain.TokenUser;
 import cn.com.boco.dss.framework.security.web.TokenUserUtils;
 import cn.com.boco.dss.subject.towerqs.common.constant.ZoneConstant;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by yxy on 2019/08/16 18:04
@@ -31,8 +32,6 @@ public class CheckUserZoneUtil {
     private DbSys dbSys;
     @Autowired
     private ZoneService zoneService;
-    @Autowired
-    private ZoneLevelService zoneLevelService;
 
     /**
      * 检查登陆用户归属的区域 -1：全部数据；1：省端用户；:2：地市端用户；3：区县；999：是其他用户组；
