@@ -119,19 +119,19 @@ public class Tower implements Serializable {
     private String status;
 
     @Column(name = "CheckRiskCount")
-    private String checkRiskCount;
+    private Integer checkRiskCount;
 
     @Column(name = "CheckRiskCountA")
-    private String checkRiskCountA;
+    private Integer checkRiskCountA;
 
     @Column(name = "DetectionRiskCount")
-    private String detectionRiskCount;
+    private Integer detectionRiskCount;
 
     @Column(name = "DetectionRiskCountA")
-    private String detectionRiskCountA;
+    private Integer detectionRiskCountA;
 
     @Column(name = "RiskLevel")
-    private String riskLevel;
+    private Integer riskLevel;
 
     public Tower() {
     }
@@ -544,43 +544,43 @@ public class Tower implements Serializable {
         this.status = status;
     }
 
-    public String getCheckRiskCount() {
+    public Integer getCheckRiskCount() {
         return checkRiskCount;
     }
 
-    public void setCheckRiskCount(String checkRiskCount) {
+    public void setCheckRiskCount(Integer checkRiskCount) {
         this.checkRiskCount = checkRiskCount;
     }
 
-    public String getCheckRiskCountA() {
+    public Integer getCheckRiskCountA() {
         return checkRiskCountA;
     }
 
-    public void setCheckRiskCountA(String checkRiskCountA) {
+    public void setCheckRiskCountA(Integer checkRiskCountA) {
         this.checkRiskCountA = checkRiskCountA;
     }
 
-    public String getDetectionRiskCount() {
+    public Integer getDetectionRiskCount() {
         return detectionRiskCount;
     }
 
-    public void setDetectionRiskCount(String detectionRiskCount) {
+    public void setDetectionRiskCount(Integer detectionRiskCount) {
         this.detectionRiskCount = detectionRiskCount;
     }
 
-    public String getDetectionRiskCountA() {
+    public Integer getDetectionRiskCountA() {
         return detectionRiskCountA;
     }
 
-    public void setDetectionRiskCountA(String detectionRiskCountA) {
+    public void setDetectionRiskCountA(Integer detectionRiskCountA) {
         this.detectionRiskCountA = detectionRiskCountA;
     }
 
-    public String getRiskLevel() {
+    public Integer getRiskLevel() {
         return riskLevel;
     }
 
-    public void setRiskLevel(String riskLevel) {
+    public void setRiskLevel(Integer riskLevel) {
         this.riskLevel = riskLevel;
     }
 

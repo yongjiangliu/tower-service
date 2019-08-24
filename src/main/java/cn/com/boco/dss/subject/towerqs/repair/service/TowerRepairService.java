@@ -1,32 +1,25 @@
 package cn.com.boco.dss.subject.towerqs.repair.service;
 
 
-import cn.com.boco.dss.common.DateHelper;
-import cn.com.boco.dss.common.data.DataColumn;
-import cn.com.boco.dss.common.util.StringUtil;
-import cn.com.boco.dss.database.JpaConfig;
-import cn.com.boco.dss.database.JpaTowerConfig;
-import cn.com.boco.dss.subject.common.helper.FilePath;
-import cn.com.boco.dss.subject.common.helper.FilePathUtil;
-import cn.com.boco.dss.subject.towerqs.check.service.TowerCheckService;
-import cn.com.boco.dss.subject.towerqs.common.geo.area.domain.Area;
-import cn.com.boco.dss.subject.towerqs.common.geo.area.service.AreaService;
-import cn.com.boco.dss.subject.towerqs.detection.service.TowerDetectionService;
-import cn.com.boco.dss.subject.towerqs.repair.domain.TowerRepair;
-import cn.com.boco.dss.subject.towerqs.repair.repository.TowerRepairRepository;
-import cn.com.boco.dss.subject.towerqs.risk.domain.TowerRisk;
-import cn.com.boco.dss.subject.towerqs.risk.service.TowerRiskService;
-import cn.com.boco.dss.subject.towerqs.tower.domain.Tower;
-import cn.com.boco.dss.subject.towerqs.tower.service.TowerService;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-import java.util.ArrayList;
-import java.util.List;
+import cn.com.boco.dss.common.DateHelper;
+import cn.com.boco.dss.database.JpaTowerConfig;
+import cn.com.boco.dss.subject.common.helper.FilePath;
+import cn.com.boco.dss.subject.towerqs.common.geo.area.domain.Area;
+import cn.com.boco.dss.subject.towerqs.common.geo.area.service.AreaService;
+import cn.com.boco.dss.subject.towerqs.repair.domain.TowerRepair;
+import cn.com.boco.dss.subject.towerqs.repair.repository.TowerRepairRepository;
+import cn.com.boco.dss.subject.towerqs.risk.domain.TowerRisk;
+import cn.com.boco.dss.subject.towerqs.risk.service.TowerRiskService;
+import cn.com.boco.dss.subject.towerqs.tower.domain.Tower;
+import cn.com.boco.dss.subject.towerqs.tower.service.TowerService;
 
 @Service
 public class TowerRepairService {
@@ -39,13 +32,6 @@ public class TowerRepairService {
 
     @Autowired
     private TowerRiskService trs;
-
-    @Autowired
-    private TowerCheckService tcs;
-
-
-    @Autowired
-    private TowerDetectionService tds;
 
     @Autowired
     private AreaService as;
@@ -92,11 +78,11 @@ public class TowerRepairService {
 
         trs.updateRiskByIds(riskList, trList, repair.getRiskIds());
         tower.setStatus("0");
-        tower.setCheckRiskCount("0");
-        tower.setCheckRiskCountA("0");
-        tower.setDetectionRiskCount("0");
-        tower.setDetectionRiskCountA("0");
-        tower.setRiskLevel("0");
+        tower.setCheckRiskCount(0);
+        tower.setCheckRiskCountA(0);
+        tower.setDetectionRiskCount(0);
+        tower.setDetectionRiskCountA(0);
+        tower.setRiskLevel(0);
         ts.save(tower);
 
         FilePath filePath = setFilePath(area, tower,repair);

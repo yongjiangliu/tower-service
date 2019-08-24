@@ -62,6 +62,20 @@ public class TowerService {
             tower.setTowerID(getNewTowerID(areaID, towerID));
             tower.setStatus("0");
         }
+        int checkRiskCount = tower.getCheckRiskCount()==null?0:tower.getCheckRiskCount().intValue();
+        int checkRiskCountA = tower.getCheckRiskCountA()==null?0:tower.getCheckRiskCountA().intValue();
+        int detectionRiskCount = tower.getDetectionRiskCount()==null?0:tower.getDetectionRiskCount().intValue();
+        int detectionRiskCountA = tower.getDetectionRiskCountA()==null?0:tower.getDetectionRiskCountA().intValue();
+        int level = 0;
+        // 风险评级，如果以上隐患为0则此值为0，A类不为0，则此值为1，如果A类为0但隐患数量>=5，此值为2，隐患数量<5此值为3
+        if (checkRiskCount == 0 && detectionRiskCount == 0) {
+            level = 0;
+        } else if (checkRiskCountA>0 || detectionRiskCountA>0) {
+            level = 1;
+        } else {
+        	level = 2;
+        }
+        tower.setRiskLevel(level);
         towerRepository.save(tower);
     }
 
