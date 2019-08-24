@@ -386,7 +386,11 @@ public class TowerCheckController {
                 risk.setTowerID(check.getTowerID());
                 risk.setResourceCode(tower.getResourceCode());
                 risk.setAddressCode(tower.getAddressCode());
-                risk.setRiskImageCount(risk.getImageNameList().size());
+                int count = 0;
+                for (String key : risk.getImageNameListMap().keySet()) {
+                    count += risk.getImageNameListMap().get(key).size();
+                }
+                risk.setRiskImageCount(count);
                 risk.setRecordDate(new Date());
                 risk.setRepairStatus(0);// 施工状态，0已计划（已下单），1施工中，2结束
                 risk.setRiskStatus(risk.getRiskStatus());// 隐患状态，0未解决，1-整治中，2-已解决
